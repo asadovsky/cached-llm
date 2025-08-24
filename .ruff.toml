@@ -1,4 +1,4 @@
-target-version = "py312"
+target-version = "py311"
 extend-include = ["*.ipynb"]
 
 [lint]
