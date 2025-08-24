@@ -74,10 +74,11 @@ class Client:
         elif provider == "gemini":
             base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
             api_key = os.environ["GEMINI_API_KEY"]
-        else:
-            assert provider == "together"
+        elif provider == "together":
             base_url = "https://api.together.xyz/v1"
             api_key = os.environ["TOGETHER_API_KEY"]
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
 
         self._provider: str = provider
         self._async_openai: AsyncOpenAI = AsyncOpenAI(
