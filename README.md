@@ -1,7 +1,9 @@
 # cached-llm
 
 ## Development
+
 ```
-ruff check --fix-only . && ruff format .
-pyright src/cached_llm/*.py
+uvx ruff check --fix-only .
+uvx ruff format .
+uvx pyright src/cached_llm/*.py
 ```
