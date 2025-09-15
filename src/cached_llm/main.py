@@ -20,7 +20,7 @@ def _cache() -> FanoutCache:
     global _CACHE
     with _CACHE_LOCK:
         if _CACHE is None:
-            _CACHE = FanoutCache(  # pyright: ignore [reportConstantRedefinition]
+            _CACHE = FanoutCache(  # pyright: ignore[reportConstantRedefinition]
                 directory=".llm_cache", shards=32
             )
     return _CACHE
