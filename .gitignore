@@ -1,4 +1,7 @@
 *.egg-info/
+.claude/settings.local.json
+.env
+.llm_cache/
 .venv/
 __pycache__/
 dist/

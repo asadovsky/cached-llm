@@ -2,6 +2,10 @@ SHELL := /bin/bash -euo pipefail
 
 .DELETE_ON_ERROR:
 
+.PHONY: test
+test:
+	python -m unittest discover . '*_test.py'
+
 ########################################
 # Format and lint
 

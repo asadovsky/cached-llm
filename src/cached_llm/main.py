@@ -11,6 +11,9 @@ from diskcache import FanoutCache
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+from openai.types.chat.chat_completion_message_tool_call import (
+    ChatCompletionMessageToolCall,
+)
 
 _CACHE = None  # lazy-initialized
 _CACHE_LOCK = threading.Lock()
@@ -34,32 +37,52 @@ def _cache_key(**kwargs: Any) -> str:
 
 @dataclasses.dataclass(kw_only=True, slots=True)
 class Message:
-    content: str
+    pass
 
 
 @dataclasses.dataclass(kw_only=True, slots=True)
 class SystemMessage(Message):
-    pass
+    content: str
 
 
 @dataclasses.dataclass(kw_only=True, slots=True)
 class UserMessage(Message):
-    pass
+    content: str
 
 
 @dataclasses.dataclass(kw_only=True, slots=True)
 class AssistantMessage(Message):
-    pass
+    content: str | None = None
+    tool_calls: list[ChatCompletionMessageToolCall] | None = None
 
 
-def enc_msg(msg: Message) -> dict[str, str]:
+@dataclasses.dataclass(kw_only=True, slots=True)
+class ToolMessage(Message):
+    tool_call_id: str
+    name: str
+    content: str
+
+
+def enc_msg(msg: Message) -> dict[str, Any]:
     if isinstance(msg, SystemMessage):
         return {"role": "system", "content": msg.content}
     elif isinstance(msg, UserMessage):
         return {"role": "user", "content": msg.content}
+    elif isinstance(msg, AssistantMessage):
+        res: dict[str, Any] = {"role": "assistant"}
+        if msg.content is not None:
+            res["content"] = msg.content
+        if msg.tool_calls is not None:
+            res["tool_calls"] = [x.model_dump() for x in msg.tool_calls]
+        return res
     else:
-        assert isinstance(msg, AssistantMessage)
-        return {"role": "assistant", "content": msg.content}
+        assert isinstance(msg, ToolMessage)
+        return {
+            "role": "tool",
+            "tool_call_id": msg.tool_call_id,
+            "name": msg.name,
+            "content": msg.content,
+        }
 
 
 class Client:
@@ -111,9 +134,8 @@ class Client:
                     **kwargs,
                 )
             _cache().set(cache_key, response)
-        content = cast(ChatCompletion, response).choices[0].message.content
-        assert content is not None
-        return AssistantMessage(content=content)
+        message = cast(ChatCompletion, response).choices[0].message
+        return AssistantMessage(content=message.content, tool_calls=message.tool_calls)
 
     async def abatch(
         self, model: str, inputs: Iterable[Iterable[Message]], **kwargs: Any

@@ -3,6 +3,7 @@ from .main import (
     Client,
     Message,
     SystemMessage,
+    ToolMessage,
     UserMessage,
 )
 
@@ -11,5 +12,6 @@ __all__ = [
     "Client",
     "Message",
     "SystemMessage",
+    "ToolMessage",
     "UserMessage",
 ]
