@@ -109,6 +109,15 @@ class Client:
         )
         self._sema: asyncio.Semaphore = asyncio.Semaphore(max_concurrency)
 
+    async def close(self) -> None:
+        await self._async_openai.close()
+
+    async def __aenter__(self) -> "Client":
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        await self.close()
+
     def provider(self) -> str:
         return self._provider
 
