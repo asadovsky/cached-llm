@@ -23,8 +23,9 @@ def _cache() -> FanoutCache:
     global _CACHE
     with _CACHE_LOCK:
         if _CACHE is None:
+            cache_dir = os.environ.get("LLM_CACHE_DIR", ".llm_cache")
             _CACHE = FanoutCache(  # pyright: ignore[reportConstantRedefinition]
-                directory=".llm_cache", shards=32
+                directory=cache_dir, shards=32
             )
     return _CACHE
 
